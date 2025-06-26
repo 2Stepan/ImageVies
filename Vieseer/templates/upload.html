@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Загрузка изображения</title>
+    <link href="/static/style.css" rel="stylesheet">
+</head>
+<body>
+    <div class="upload-container">
+        <h1>Загрузить изображение</h1>
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            
+            <div class="form-group">
+                <label>Изображение:</label>
+                {{ form.image }}
+            </div>
+            
+            <div class="form-group">
+                <label>Теги:</label>
+                {{ form.tags }}
+                <small>Введите через запятую</small>
+            </div>
+            
+            <button type="submit">Опубликовать</button>
+        </form>
+    </div>
+</body>
+</html>

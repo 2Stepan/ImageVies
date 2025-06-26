@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Лента изображений</title>
+    <link href="/static/style.css" rel="stylesheet">
+   <style>
+    .nav-buttons {
+    margin-bottom: 20px;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.button {
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-weight: bold;
+}
+
+.primary {
+    background-color: #4CAF50;
+    color: white;
+}
+
+.secondary {
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+}
+
+.danger {
+    background-color: #f44336;
+    color: white;
+}
+
+.image-card {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+}
+   </style>
+</head>
+<body>
+    <div class="nav-buttons">
+        {% if user.is_authenticated %}
+            <!-- Для авторизованных пользователей -->
+            <span>Добро пожаловать, {{ user.username }}!</span>
+            <a href="{% url 'upload' %}" class="button primary">Загрузить фото</a>
+            <a href="{% url 'logout' %}" class="button danger">Выйти</a>
+        {% else %}
+            <!-- Для гостей -->
+            <a href="{% url 'login' %}" class="button primary">Войти</a>
+            <a href="{% url 'register' %}" class="button secondary">Регистрация</a>
+        {% endif %}
+    </div>
+
+    <h1>Лента изображений</h1>
+    
+    {% if images %}
+        {% for image in images %}
+        <div class="image-card">
+            <h2>{{ image.title }}</h2>
+            {% if image.image %}
+                <img src="{{ image.image.url }}" alt="{{ image.title }}" style="max-width: 300px;">
+            {% else %}
+                <p>Изображение отсутствует</p>
+            {% endif %}
+            <div class="tags">
+                {% for tag in image.get_tags_list %}
+                <span class="tag">{{ tag }}</span>
+                {% endfor %}
+            </div>
+            <p>Пользователь: {{ image.author.username }}</p>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>Нет изображений для отображения</p>
+    {% endif %}
+</body>
+</html>
