@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Мои коллекции</title>
+    <link href="/static/style.css" rel="stylesheet">
+    <style>
+        .collections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .collection-card {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+
+        .collection-card h3 {
+            padding: 15px;
+            margin: 0;
+            background: #4285f4;
+            color: white;
+        }
+
+        .collection-images {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 5px;
+            padding: 10px;
+        }
+
+        .collection-images img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+        }
+
+        .collection-footer {
+            padding: 10px;
+            text-align: center;
+        }
+
+        .button {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            padding: 10px 20px;
+            border-radius: 6px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            margin-right: 10px;
+        }
+
+        .button.secondary {
+            background-color: #f1f1f1;
+            color: #333;
+            border: 1px solid #ddd;
+        }
+
+        .button.secondary:hover {
+            background-color: #e1e1e1;
+        }
+
+        .button.primary {
+            background-color: #4285f4;
+            color: white;
+        }
+
+        .button.primary:hover {
+            background-color: #3367d6;
+            transform: translateY(-2px);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Иконки для кнопок */
+        .button .icon {
+            margin-right: 8px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="nav-buttons">
+        <div class="action-buttons">
+            <a href="{% url 'gallery' %}" class="button secondary">
+                <span class="icon">←</span> Назад к галерее
+            </a>
+            <button class="button primary" onclick="openModal()">
+                <span class="icon">+</span> Новая коллекция
+            </button>
+        </div>
+    </div>
+
+    <h1>Мои коллекции</h1>
+
+    {% if collections %}
+    <div class="collections-grid">
+        {% for collection in collections %}
+        <div class="collection-card">
+            <h3>{{ collection.name }}</h3>
+            <div class="collection-images">
+                {% for image in collection.images.all|slice:":6" %}
+                <a href="{% url 'image_detail' image.id %}">
+                    <img src="{{ image.image.url }}" alt="{{ image.title }}">
+                </a>
+                {% endfor %}
+            </div>
+            <div class="collection-footer">
+                <a href="{% url 'image_detail' collection.images.first.id %}?collection={{ collection.id }}">
+                    Просмотреть все ({{ collection.images.count }})
+                </a>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p>У вас пока нет коллекций</p>
+    {% endif %}
+
+    <!-- Модальное окно для новой коллекции -->
+    <div id="collection-modal" class="modal">
+        <div class="modal-content">
+            <h3>Создать новую коллекцию</h3>
+            <form id="new-collection-form">
+                {% csrf_token %}
+                <input type="text" name="name" placeholder="Название коллекции" required>
+                <button type="submit" class="button primary">Создать</button>
+                <button type="button" class="button secondary" onclick="closeModal()">Отмена</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Функции для модального окна
+        function openModal() {
+            document.getElementById('collection-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('collection-modal').style.display = 'none';
+        }
+
+        // Обработка создания коллекции
+        document.getElementById('new-collection-form').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+
+            fetch('/collections/create/', {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: formData
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === 'ok') {
+                        closeModal();
+                        location.reload(); // Обновляем страницу
+                    } else {
+                        alert('Ошибка: ' + (data.errors?.name || 'Неизвестная ошибка'));
+                    }
+                });
+        });
+    </script>
+</body>
+
+</html>

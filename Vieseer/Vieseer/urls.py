@@ -19,14 +19,21 @@ from django.contrib import admin
 from django.urls import path
 from Vieseer import settings
 from django.conf.urls.static import static
-from VieseerApp import views
-from VieseerApp.views import upload_image, gallery
+from VieseerApp.views import register_view,login_view,logout_view,upload_image, gallery, \
+    download_image,create_collection,manage_collection,user_collections,like_image,add_to_collection,image_detail
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path("register/", views.register_view, name="register"),
-    path("login/", views.login_view, name="login"),
-    path("logout/", views.logout_view, name="logout"),
+    path("register/", register_view, name="register"),
+    path("login/", login_view, name="login"),
+    path("logout/", logout_view, name="logout"),
     path('upload/', upload_image, name='upload'),
     path('',gallery, name = 'gallery'),
+    path('download/<int:image_id>/', download_image, name='download'),
+    path('collections/create/', create_collection, name='create_collection'),
+    path('collections/manage/<int:image_id>/', manage_collection, name='manage_collection'),
+    path('collections/', user_collections, name='user_collections'),
+    path('like/<int:image_id>/', like_image, name='like_image'),
+    path('add_to_collection/', add_to_collection, name='add_to_collection'),
+    path('image/<int:image_id>/', image_detail, name='image_detail'),
 ]+ static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)
