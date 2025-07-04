@@ -9,7 +9,7 @@ import os
 from django.core.files.storage import default_storage
 from django.db.models import Prefetch
 from VieseerApp.forms import RegisterForm,ImageUploadForm,CollectionForm,AddToCollectionForm
-from VieseerApp.models import Image, Collection,CollectionImage
+from VieseerApp.models import Image, Collection,CollectionImage,Tag
 # Create your views here.
 
 # Регистрация
@@ -47,6 +47,13 @@ def upload_image(request):
         if form.is_valid():
             new_image = form.save(commit=False)
             new_image.author = request.user
+            
+            tags = form.cleaned_data['tags']
+            if tags:
+                tags_list = [tag.strip() for tag in tags.split(',')]
+                tags_list = list(set(tags_list))
+                new_image.tags = ', '.join(tags_list)
+            
             new_image.save()
             return redirect('gallery')
     else:

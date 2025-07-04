@@ -3,6 +3,7 @@ from PIL import Image as PILImage
 from django.core.files.storage import default_storage
 import os
 from django.contrib.auth.models import User
+from django.conf import settings
 
 
 # Create your models here.
@@ -69,6 +70,23 @@ class Image(models.Model):
             user=user
         )
     
+def load_forbidden_words():
+    file_path = os.path.join(settings.BASE_DIR, 'forbidden_words.txt')
+    forbidden_words = set()
+    
+    try:
+        with open(file_path, 'r', encoding='utf-8') as f:
+            for line in f:
+                word = line.strip().lower()  
+                if word and not word.startswith('#'): 
+                    forbidden_words.add(word)
+    except FileNotFoundError:
+        print(f"Файл {file_path} не найден")
+    
+    return forbidden_words
+
+FORBIDDEN_WORDS = load_forbidden_words()
+
 class Collection(models.Model):
     name = models.CharField(max_length=100)
     user = models.ForeignKey(User, on_delete=models.CASCADE)

@@ -7,7 +7,7 @@
 <body>
     <div class="upload-container">
         <h1>Загрузить изображение</h1>
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" id="upload-form">
             {% csrf_token %}
             
             <div class="form-group">
@@ -16,13 +16,62 @@
             </div>
             
             <div class="form-group">
-                <label>Теги:</label>
-                {{ form.tags }}
-                <small>Введите через запятую</small>
+                <label>Добавить теги:</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="new-tag-input" placeholder="Введите тег">
+                    <button type="button" id="add-tag-btn">Добавить тег</button>
+                </div>
+                
+                <div class="tag-container" id="tags-container">
+                </div>
+                
+                <input type="hidden" name="tags" id="tags-input">
             </div>
             
             <button type="submit">Опубликовать</button>
         </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const addTagBtn = document.getElementById('add-tag-btn');
+            const newTagInput = document.getElementById('new-tag-input');
+            const tagsContainer = document.getElementById('tags-container');
+            const tagsInput = document.getElementById('tags-input');
+            let tags = [];
+            
+            addTagBtn.addEventListener('click', function() {
+                const tagText = newTagInput.value.trim();
+                if (tagText && !tags.includes(tagText)) {
+                    tags.push(tagText);
+                    updateTagsDisplay();
+                    newTagInput.value = '';
+                }
+            });
+            
+            function updateTagsDisplay() {
+                tagsContainer.innerHTML = '';
+                tagsInput.value = tags.join(',');
+                
+                tags.forEach(tag => {
+                    const tagElement = document.createElement('div');
+                    tagElement.className = 'tag';
+                    tagElement.innerHTML = `
+                        ${tag}
+                        <span class="tag-remove" data-tag="${tag}">×</span>
+                    `;
+                    tagsContainer.appendChild(tagElement);
+                });
+                
+                document.querySelectorAll('.tag-remove').forEach(btn => {
+                    btn.addEventListener('click', function() {
+                        const tagToRemove = this.getAttribute('data-tag');
+                        tags = tags.filter(t => t !== tagToRemove);
+                        updateTagsDisplay();
+                    });
+                });
+            }
+        });
+    </script>
 </body>
 </html>
